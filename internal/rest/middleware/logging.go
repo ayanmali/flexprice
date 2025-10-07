@@ -22,17 +22,16 @@ func LoggingMiddleware(log *logger.Logger) gin.HandlerFunc {
 		// Calculate latency
 		latency := time.Since(start)
 
-		// Get request ID from context (already set by RequestIDMiddleware)
-		requestID := c.Request.Context().Value(types.CtxRequestID).(string)
-
-		// Build log fields
 		fields := []interface{}{
 			"status", c.Writer.Status(),
 			"method", c.Request.Method,
 			"path", path,
 			"query", raw,
 			"latency_ms", latency.Milliseconds(),
-			"request_id", requestID,
+		}
+
+		if requestID, ok := c.Request.Context().Value(types.CtxRequestID).(string); ok && requestID != "" {
+			fields = append(fields, "request_id", requestID)
 		}
 
 		// Add error if any
